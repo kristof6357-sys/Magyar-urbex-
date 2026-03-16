@@ -31,7 +31,7 @@ var markers = [];
 var dataGlobal = [];
 
 // CSV betöltése
-d3.csv("ubex_helyek.csv").then(function(data) {
+d3.csv("urbex_helyek.csv").then(function(data) {
   dataGlobal = data; // a keresőhöz
   data.forEach(function(d) {
     var marker = L.marker([+d.lat, +d.lng]).addTo(map);
