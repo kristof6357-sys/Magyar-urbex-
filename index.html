@@ -1,82 +1,44 @@
-
 <!DOCTYPE html>
 <html lang="hu">
 <head>
 <meta charset="UTF-8">
-<title>Urbex térkép</title>
-
+<title>Urbex Terkep</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
-
 <style>
-  body { margin:0; font-family:Arial; }
-  #map { height:90vh; width:100%; }
-  #status { padding:10px; background:black; color:lime; }
+  body { margin:0; }
+  #map { height:100vh; width:100%; }
   img { max-width:200px; border-radius:8px; }
 </style>
 </head>
 <body>
 
-<div id="status">Indítás...</div>
 <div id="map"></div>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <script>
 // MAP
-var map = L.map('map').setView([47.4979, 19.0402], 8);
+var map = L.map('map').setView([47.4979,19.0402],8);
 
-// 🔥 HYBRID (utcanevek + műhold)
-var hybrid = L.tileLayer(
-  'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
-  { maxZoom: 20 }
-).addTo(map);
+// HYBRID GOOGLE
+L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', { maxZoom:20 }).addTo(map);
 
-// STATUS
-function status(msg){
-  document.getElementById("status").innerText = msg;
-}
+// MARKEREK: minden hely közvetlenül a kódban
+var places = [
+  {nev:"Kistarcsai loter", leiras:"elhagyott katonai teren", lat:47.5212, lng:19.1988, nehezseg:"kozepes", kep:"https://via.placeholder.com/200"},
+  {nev:"Elhagyott gyar 1", leiras:"regi ipari epulet", lat:47.50, lng:19.10, nehezseg:"konnyu", kep:"https://via.placeholder.com/200"},
+  {nev:"Elhagyott gyar 2", leiras:"regi ipari epulet", lat:47.51, lng:19.11, nehezseg:"konnyu", kep:"https://via.placeholder.com/200"},
+  {nev:"Elhagyott gyar 3", leiras:"regi ipari epulet", lat:47.52, lng:19.12, nehezseg:"kozepes", kep:"https://via.placeholder.com/200"},
+  {nev:"Elhagyott gyar 4", leiras:"regi ipari epulet", lat:47.53, lng:19.13, nehezseg:"nehez", kep:"https://via.placeholder.com/200"},
+  {nev:"Elhagyott gyar 5", leiras:"regi ipari epulet", lat:47.54, lng:19.14, nehezseg:"konnyu", kep:"https://via.placeholder.com/200"}
+  // ide jöhet a további 114 hely ugyanezzel a formátummal
+];
 
-// CSV BETÖLTÉS
-fetch("urbex_helyek.csv")
-  .then(res => {
-    if(!res.ok) throw new Error("Nincs CSV fájl!");
-    return res.text();
-  })
-  .then(text => {
-    const rows = text.split("\n").slice(1);
-    let db = 0;
-
-    rows.forEach(r => {
-      if(!r.trim()) return;
-
-      const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-
-      const nev = c[0];
-      const leiras = c[1];
-      const lat = parseFloat(c[2]);
-      const lng = parseFloat(c[3]);
-      const nehezseg = c[4];
-      const kep = c[5];
-
-      if(!isNaN(lat) && !isNaN(lng)){
-        L.marker([lat,lng]).addTo(map)
-          .bindPopup(`
-            <b>${nev}</b><br>
-            ${leiras}<br>
-            Nehézség: ${nehezseg}<br>
-            <img src="${kep}">
-          `);
-        db++;
-      }
-    });
-
-    status("Betöltve: " + db + " hely ✅");
-  })
-  .catch(e => {
-    status("HIBA ❌: " + e.message);
-    console.error(e);
-  });
-
+// MARKEREK HOZZÁADÁSA
+places.forEach(function(p){
+  L.marker([p.lat,p.lng]).addTo(map)
+   .bindPopup("<b>"+p.nev+"</b><br>"+p.leiras+"<br><b>Nehézség:</b> "+p.nehezseg+"<br><img src='"+p.kep+"'>");
+});
 </script>
 
 </body>
