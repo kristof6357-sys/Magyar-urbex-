@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="hu">
 <head>
@@ -9,73 +10,71 @@
 <style>
   body { margin:0; font-family:Arial; }
   #map { height:90vh; width:100%; }
-  #status { padding:10px; background:#111; color:#0f0; font-size:14px; }
+  #status { padding:10px; background:black; color:lime; }
   img { max-width:200px; border-radius:8px; }
 </style>
 </head>
 <body>
 
-<div id="status">Betöltés...</div>
+<div id="status">Indítás...</div>
 <div id="map"></div>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <script>
-// Térkép
-var map = L.map('map').setView([47.4979,19.0402], 8);
+// MAP
+var map = L.map('map').setView([47.4979, 19.0402], 8);
 
-// MŰHOLD
-L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
-  maxZoom: 20,
-  subdomains:['mt0','mt1','mt2','mt3']
-}).addTo(map);
+// 🔥 HYBRID (utcanevek + műhold)
+var hybrid = L.tileLayer(
+  'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
+  { maxZoom: 20 }
+).addTo(map);
 
-// Állapot kiírás
+// STATUS
 function status(msg){
   document.getElementById("status").innerText = msg;
 }
 
-// CSV betöltés
+// CSV BETÖLTÉS
 fetch("urbex_helyek.csv")
   .then(res => {
-    if(!res.ok) throw new Error("CSV nem található!");
+    if(!res.ok) throw new Error("Nincs CSV fájl!");
     return res.text();
   })
   .then(text => {
-    status("CSV betöltve ✅");
-
     const rows = text.split("\n").slice(1);
-    let count = 0;
+    let db = 0;
 
-    rows.forEach(row => {
-      if(row.trim() === "") return;
+    rows.forEach(r => {
+      if(!r.trim()) return;
 
-      const cols = row.split(",");
+      const c = r.split(",");
 
-      const nev = cols[0];
-      const leiras = cols[1];
-      const lat = parseFloat(cols[2]);
-      const lng = parseFloat(cols[3]);
-      const nehezseg = cols[4];
-      const kep = cols[5];
+      const nev = c[0];
+      const leiras = c[1];
+      const lat = parseFloat(c[2]);
+      const lng = parseFloat(c[3]);
+      const nehezseg = c[4];
+      const kep = c[5];
 
       if(!isNaN(lat) && !isNaN(lng)){
         L.marker([lat,lng]).addTo(map)
           .bindPopup(`
-            <h3>${nev}</h3>
-            <p>${leiras}</p>
-            <b>Nehézség:</b> ${nehezseg}<br>
+            <b>${nev}</b><br>
+            ${leiras}<br>
+            Nehézség: ${nehezseg}<br>
             <img src="${kep}">
           `);
-        count++;
+        db++;
       }
     });
 
-    status("Betöltve: " + count + " hely");
+    status("Betöltve: " + db + " hely ✅");
   })
-  .catch(err => {
-    status("HIBA ❌: " + err.message);
-    console.error(err);
+  .catch(e => {
+    status("HIBA ❌: " + e.message);
+    console.error(e);
   });
 
 </script>
