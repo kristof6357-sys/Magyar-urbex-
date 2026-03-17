@@ -49,7 +49,7 @@ fetch("urbex_helyek.csv")
     rows.forEach(r => {
       if(!r.trim()) return;
 
-      const c = r.split(",");
+      const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
 
       const nev = c[0];
       const leiras = c[1];
