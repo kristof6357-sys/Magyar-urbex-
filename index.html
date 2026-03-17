@@ -15,17 +15,16 @@
 
 <div id="map"></div>
 
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.gridlayer.googlemutant/Leaflet.GoogleMutant.js"></script>
 
 <script>
 // Térkép létrehozása
 var map = L.map('map').setView([47.4979,19.0402], 8);
 
-L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
-  maxZoom: 20,
-  subdomains:['mt0','mt1','mt2','mt3']
+var googleSat = L.gridLayer.googleMutant({
+    type: 'satellite'
 }).addTo(map);
-
+  
 // CSV betöltése fetch-sel
 fetch("urbex_helyek.csv")
   .then(response => response.text())
