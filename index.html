@@ -1,43 +1,57 @@
-
 <!DOCTYPE html>
 <html lang="hu">
 <head>
 <meta charset="UTF-8">
 <title>Urbex térkép</title>
+
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
 <style>
   body { margin:0; font-family:Arial; }
-  #map { height:100vh; width:100%; }
-  .popup img { width:200px; border-radius:8px; }
+  #map { height:90vh; width:100%; }
+  #status { padding:10px; background:#111; color:#0f0; font-size:14px; }
+  img { max-width:200px; border-radius:8px; }
 </style>
 </head>
 <body>
 
+<div id="status">Betöltés...</div>
 <div id="map"></div>
-  
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
-<script src="https://unpkg.com/leaflet.gridlayer.googlemutant/Leaflet.GoogleMutant.js"></script>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <script>
-// Térkép létrehozása
-var googleSat = L.gridLayer.googleMutant({
-    type: 'satellite'
-}).addTo(map);
+// Térkép
+var map = L.map('map').setView([47.4979,19.0402], 8);
 
+// MŰHOLD
 L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
   maxZoom: 20,
   subdomains:['mt0','mt1','mt2','mt3']
 }).addTo(map);
-  
-// CSV betöltése fetch-sel
+
+// Állapot kiírás
+function status(msg){
+  document.getElementById("status").innerText = msg;
+}
+
+// CSV betöltés
 fetch("urbex_helyek.csv")
-  .then(response => response.text())
-  .then(data => {
-    const rows = data.split("\n").slice(1); // az első sor a header
+  .then(res => {
+    if(!res.ok) throw new Error("CSV nem található!");
+    return res.text();
+  })
+  .then(text => {
+    status("CSV betöltve ✅");
+
+    const rows = text.split("\n").slice(1);
+    let count = 0;
+
     rows.forEach(row => {
       if(row.trim() === "") return;
+
       const cols = row.split(",");
+
       const nev = cols[0];
       const leiras = cols[1];
       const lat = parseFloat(cols[2]);
@@ -47,10 +61,23 @@ fetch("urbex_helyek.csv")
 
       if(!isNaN(lat) && !isNaN(lng)){
         L.marker([lat,lng]).addTo(map)
-         .bindPopup(`<h3>${nev}</h3><p>${leiras}</p><b>Nehézség:</b> ${nehezseg}<br><img src="${kep}">`);
+          .bindPopup(`
+            <h3>${nev}</h3>
+            <p>${leiras}</p>
+            <b>Nehézség:</b> ${nehezseg}<br>
+            <img src="${kep}">
+          `);
+        count++;
       }
     });
+
+    status("Betöltve: " + count + " hely");
+  })
+  .catch(err => {
+    status("HIBA ❌: " + err.message);
+    console.error(err);
   });
+
 </script>
 
 </body>
